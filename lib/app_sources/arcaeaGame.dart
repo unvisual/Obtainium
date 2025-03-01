@@ -27,7 +27,7 @@ class ArcaeaGame extends AppSource {
             await sourceRequest(
             'https://webapi.lowiro.com/webapi/serve/static/bin/arcaea/apk', 
             additionalSettings);
-        jsonMap = jsonDecode(res);
+        json = jsonDecode(res);
     } catch (e) {
         // placeholder
         throw NoVersionError();
