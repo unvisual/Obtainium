@@ -27,6 +27,7 @@ import 'package:obtainium/app_sources/rustore.dart';
 import 'package:obtainium/app_sources/sourceforge.dart';
 import 'package:obtainium/app_sources/sourcehut.dart';
 import 'package:obtainium/app_sources/telegramapp.dart';
+import 'package:obtainium/app_sources/arcaeaGame.dart';
 import 'package:obtainium/app_sources/tencent.dart';
 import 'package:obtainium/app_sources/uptodown.dart';
 import 'package:obtainium/components/generated_form.dart';
@@ -877,6 +878,7 @@ class SourceProvider {
         APKMirror(),
         RuStore(),
         TelegramApp(),
+        ArcaeaGame(),
         NeutronCode(),
         DirectAPKLink(),
         HTML() // This should ALWAYS be the last option as they are tried in order
