@@ -4,16 +4,22 @@ import 'package:http/http.dart';
 import 'package:obtainium/custom_errors.dart';
 import 'package:obtainium/providers/source_provider.dart';
 import 'dart:convert';
+import 'package:flutter_js/flutter_js.dart';
 
+final jsRuntime = getJavascriptRuntime();
+/**
+This is an experimental provider
+using user-defined JavaScript to parse Web
+ */
 class ArcaeaGame extends AppSource {
   ArcaeaGame() {
     hosts = ['arcaea.lowiro.com'];
-    name = 'Arcaea ${tr('app')}';
+    name = 'Arcaea ${tr('app')} (Experimental)';
   }
 
   @override
   String sourceSpecificStandardizeURL(String url, {bool forSelection = false}) {
-    return 'https://${hosts[0]}';
+    return url;
   }
 
   @override
@@ -21,28 +27,37 @@ class ArcaeaGame extends AppSource {
     String standardUrl,
     Map<String, dynamic> additionalSettings,
   ) async {
-    Map<String, dynamic> json;
-    try {
-        Response res = 
-            await sourceRequest(
-            'https://webapi.lowiro.com/webapi/serve/static/bin/arcaea/apk', 
-            additionalSettings);
-        json = jsonDecode(res);
-    } catch (e) {
-        // placeholder
-        throw NoVersionError();
-    }
-    
-    if (json['success'] != true)
-        throw NoVersionError(); // May failed for many reasons
-    
-    Map<String, String> messages = json['value'];
-    var version = messages['version'];
-    String apkUrl = messages['url'];
-    return APKDetails(
-        version,
-        [MapEntry<String, String>('Arcaea-$version.apk', apkUrl)],
-        AppNames('Arcaea', 'Arcaea'));
+    Response res = 
+      await sourceRequest(
+      'https://webapi.lowiro.com/webapi/serve/static/bin/arcaea/apk', 
+      additionalSettings);
 
+    // A script example (Placeholder)
+    String script = '''
+      function parseData(input) {
+        // parseData
+        let res = JSON.parse(input);
+        if (!res.success) return;
+        res = res.value;
+        return {
+          name: "Arcaea",
+          version: res.version,
+          author: "lowiro",
+          url: res.url
+        };
+      }
+    ''';
+
+    JsEvalResult jsResult = jsRuntime.evaluate(jsCode);
+    if (!(jsResult.rawResult is Map)) 
+      throw NoVersionError();
+    Map<String, dynamic> data = Map<String, dynamic>.from(jsResult.rawResult);
+    String version = data['version']!;
+    String name = data['name']!;
+    String author = data['author'] ?? name;
+    return APKDetails(
+      version,
+      [MapEntry<String, String>('$name-$version.apk', apkUrl)],
+      AppNames(author, name));
   }
 }
